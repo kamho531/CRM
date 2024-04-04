@@ -141,6 +141,70 @@ def searchname(item):
         querydb()
 
 
+def format_phonenum(event):
+    # formats the entry text as it's being
+    # entered; format is '(ddd)-ddd-dddd'
+        
+    if event.keysym == 'Tab':   # allow tab to next field
+        return
+        
+    widget = event.widget       # get the entry widget
+    entry = widget.get()        # get the text content
+    idx = widget.index(INSERT)  # current cursor position
+                
+    if event.keysym == 'Left':  # skip format chars
+        if idx == 0:
+            return 'break'      # block edit
+        elif idx == 5:
+            widget.icursor(3)
+        elif idx == 9:
+            widget.icursor(8)
+        
+    elif event.keysym == 'Right':   # skip format chars
+        if idx == 2:
+            widget.icursor(4)
+        elif idx == 8:
+            widget.icursor(9)
+        
+    elif event.keysym == 'BackSpace':
+        # convert a backspace to a 'Left' event
+        widget.event_generate('<Left>')
+        return 'break'
+        
+    else:        
+        # block if char not a digit 
+        # or phone number will be to long
+        if not event.char.isdigit() or idx > 13:
+            widget.bell()
+            return 'break'  # block edit
+            
+        if idx == widget.index(END):
+            # allow adding a new digit,
+            # inserting format characters
+            # where necessary
+            if idx == 0:    # insert format chars
+                widget.insert(idx, '(' + event.char)
+                return 'break'
+                
+            if idx == 4:    # insert format chars
+                widget.insert(idx,')-' + event.char)
+                return 'break'
+                
+            if idx == 5 or idx == 9:   # insert format char
+                widget.insert(idx,'-' + event.char)
+                return 'break'
+            
+        else:  # replacing a digit
+            if idx in [0,4,5,9]:
+                # disallow if overwriting
+                # format chars
+                widget.bell()
+                return 'break'
+                
+            else:  # ok to replace
+                widget.delete(idx)
+
+
 # create a menu
 #mymenu = tb.Menu(root)
 #root.config(menu=mymenu)
@@ -306,6 +370,7 @@ emailentry.grid(row=1, column=5, padx=10, pady=10)
 phonelabel = tb.Label(dataframe, text="Phone Number", style='warning.TLabel')
 phonelabel.grid(row=1, column=6, padx=10, pady=10)
 phoneentry = tb.Entry(dataframe, font=("Helvetica", 14))
+phoneentry.bind('<KeyPress>', format_phonenum)
 phoneentry.grid(row=1, column=7, padx=10, pady=10)
 
 adrslabel = tb.Label(dataframe, text="Address", style='warning.TLabel')
@@ -618,9 +683,8 @@ searchmenu = tb.Menu(mymenu)
 # drop down menu - add items to inside menubutton
 item_in_dropdown = tb.StringVar()
 for item in ['Search', 'Start Over']:
-    searchmenu.add_radiobutton(label=item, 
-                               font=("Helvetica", 14),
-                               variable=item_in_dropdown, 
+    searchmenu.add_cascade(label=item, 
+                               font=("Helvetica", 14), 
                                command=lambda item=item : searchname(item))
 # associate inside menu with the menubutton
 mymenu['menu'] = searchmenu
