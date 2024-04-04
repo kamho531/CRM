@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import ttkbootstrap as tb
 import sqlite3
+import re
 
 
 # color choices: primary, secondary, success, info, warning, danger, light, dark
@@ -205,6 +206,20 @@ def format_phonenum(event):
                 widget.delete(idx)
 
 
+def validate_email(email_input):
+    regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+    if(re.search(regex,email_input) and email_input.isalpha):
+        email_invalid_label.config(text="")
+        addbtn.config(state='active')
+        updatebtn.config(state='active')  
+        return True        
+    else:
+        email_invalid_label.config(text="Email invalid", foreground="red")
+        addbtn.config(state='disabled') 
+        updatebtn.config(state='disabled')
+        return False 
+
+
 # create a menu
 #mymenu = tb.Menu(root)
 #root.config(menu=mymenu)
@@ -362,9 +377,12 @@ lnamelabel.grid(row=1, column=2, padx=10, pady=10)
 lnameentry = tb.Entry(dataframe, font=("Helvetica", 14))
 lnameentry.grid(row=1, column=3, padx=10, pady=10)
 
+email_valid = dataframe.register(validate_email)
+email_invalid_label = tb.Label(dataframe, style='warning.TLabel')
+email_invalid_label.grid(row=0, column=5, pady=10)
 emaillabel = tb.Label(dataframe, text="Email", style='warning.TLabel')
 emaillabel.grid(row=1, column=4, padx=10, pady=10)
-emailentry = tb.Entry(dataframe, font=("Helvetica", 14))
+emailentry = tb.Entry(dataframe, font=("Helvetica", 14), validate='focus', validatecommand=(email_valid,'%P'))
 emailentry.grid(row=1, column=5, padx=10, pady=10)
 
 phonelabel = tb.Label(dataframe, text="Phone Number", style='warning.TLabel')
