@@ -13,7 +13,8 @@ import re
 
 root = tb.Window(themename="superhero")
 root.title('CRM')
-root.geometry("%dx%d" % (root.winfo_screenwidth(), root.winfo_screenheight()))  # full screen
+root.state('zoomed')
+#root.geometry("%dx%d" % (root.winfo_screenwidth(), root.winfo_screenheight()))  # full screen
 #root.geometry('1440x700')
 
 # create styles
